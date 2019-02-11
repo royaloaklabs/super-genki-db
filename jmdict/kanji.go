@@ -1,5 +1,5 @@
 //Package entries contains structs of elements parsed in the XML files
-package sql
+package jmdict
 
 import "encoding/xml"
 

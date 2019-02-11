@@ -8,7 +8,7 @@ import (
 	"regexp"
 
 	"github.com/funayman/super-genki-db/db"
-	"github.com/funayman/super-genki-db/sql"
+	"github.com/funayman/super-genki-db/jmdict"
 )
 
 func main() {
@@ -20,7 +20,7 @@ func main() {
 	defer data.Close()
 
 	//parse data
-	var words []*sql.Entry
+	var words []*jmdict.Entry
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -61,7 +61,7 @@ func main() {
 		switch se := t.(type) {
 		case xml.StartElement:
 			if se.Name.Local == "entry" {
-				var e *sql.Entry
+				var e *jmdict.Entry
 
 				if err = decoder.DecodeElement(&e, &se); err != nil {
 					log.Fatal(err)
