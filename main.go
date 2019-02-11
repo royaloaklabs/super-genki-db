@@ -1,15 +1,13 @@
 package main
 
 import (
-	"bytes"
 	"encoding/xml"
 	"fmt"
-	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"regexp"
 
+	"github.com/funayman/super-genki-db/db"
 	"github.com/funayman/super-genki-db/sql"
 )
 
@@ -22,16 +20,10 @@ func main() {
 	defer data.Close()
 
 	//parse data
-	words, err := LoadJMDict(data)
+	var words []*sql.Entry
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	fmt.Println(words)
-}
-
-func LoadJMDict(f io.Reader) (words []*sql.Entry, err error) {
-	d, _ := ioutil.ReadAll(f)
 
 	//needed to fix issue
 	//https://groups.google.com/forum/#!topic/golang-nuts/yF9RM9rnkYc
@@ -39,7 +31,7 @@ func LoadJMDict(f io.Reader) (words []*sql.Entry, err error) {
 	//fix errors when trying to parse &n; &hon; etc
 	var rEntity = regexp.MustCompile(`<!ENTITY\s+([^\s]+)\s+"([^"]+)">`)
 	entities := make(map[string]string)
-	entityDecoder := xml.NewDecoder(bytes.NewReader(d))
+	entityDecoder := xml.NewDecoder(data)
 	for {
 		t, _ := entityDecoder.Token()
 		if t == nil {
@@ -54,11 +46,11 @@ func LoadJMDict(f io.Reader) (words []*sql.Entry, err error) {
 		for _, m := range rEntity.FindAllSubmatch(dir, -1) {
 			entities[string(m[1])] = string(m[2])
 		}
-
 	}
 
-	decoder := xml.NewDecoder(bytes.NewReader(d)) //go through the data again
-	decoder.Entity = entities                     //load entities into the decoder EntityMap
+	data.Seek(0, 0)
+	decoder := xml.NewDecoder(data) //go through the data again
+	decoder.Entity = entities       //load entities into the decoder EntityMap
 	for {
 		//grab all <entry> tokens and Unmarshal into struct
 		t, _ := decoder.Token()
@@ -72,7 +64,7 @@ func LoadJMDict(f io.Reader) (words []*sql.Entry, err error) {
 				var e *sql.Entry
 
 				if err = decoder.DecodeElement(&e, &se); err != nil {
-					return nil, err
+					log.Fatal(err)
 				}
 				words = append(words, e)
 			}
@@ -80,5 +72,10 @@ func LoadJMDict(f io.Reader) (words []*sql.Entry, err error) {
 			//do nothing
 		}
 	}
-	return words, nil
+
+	db.Connect()
+
+	for _, word := range words {
+		fmt.Println(word)
+	}
 }
