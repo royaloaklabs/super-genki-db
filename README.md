@@ -2,7 +2,7 @@
 
 Quick utility to create the database for the Super Genki: Japanese Dictionary app
 
-## Prereq
+## Prerequisite
 This utility depends on the [go-sqlite3](https://github.com/mattn/go-sqlite3) driver to write to the SQLite database, it can be installed by running:
 ```bash
 $ go get github.com/mattn/go-sqlite3
