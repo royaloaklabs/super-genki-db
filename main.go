@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"github.com/funayman/super-genki-db/db"
-	"github.com/funayman/super-genki-db/jmdict"
+	"github.com/Xsixteen/super-genki-db/db"
+	"github.com/Xsixteen/super-genki-db/jmdict"
 )
 
 func main() {

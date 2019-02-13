@@ -6,7 +6,7 @@ import (
 
 	"database/sql"
 
-	"github.com/funayman/super-genki-db/jmdict"
+	"github.com/Xsixteen/super-genki-db/jmdict"
 	_ "github.com/mattn/go-sqlite3"
 )
 
