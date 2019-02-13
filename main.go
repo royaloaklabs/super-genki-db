@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/funayman/super-genki-db/db"
@@ -9,7 +8,6 @@ import (
 )
 
 func main() {
-
 	err := jmdict.Parse()
 	if err != nil {
 		log.Fatal(err)
@@ -17,5 +15,8 @@ func main() {
 
 	db.Connect()
 
-	fmt.Println(len(jmdict.Entries))
+	err = db.InsertData()
+	if err != nil {
+		log.Fatal(err)
+	}
 }
