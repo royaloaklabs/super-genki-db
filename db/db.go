@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	Delimiter      = ";"
-	SenseDelimiter = "||"
+	Delimiter      = " "
+	SenseDelimiter = "(SG)"
 	GlossDelimiter = ";;"
 )
 
@@ -61,7 +61,7 @@ func InsertData() (err error) {
 	for _, entry := range jmdict.Entries {
 		var kanji, kana, sense string
 
-		stmt, err := SQL.Prepare("INSERT INTO einihongo VALUES(?,?,?)")
+		stmt, err := SQL.Prepare("INSERT INTO einihongo(docid,kanji,kana,gloss) VALUES(?,?,?,?)")
 		if err != nil {
 			return err
 		}
@@ -92,7 +92,7 @@ func InsertData() (err error) {
 		sense = strings.Join(tempSense, SenseDelimiter)
 
 		// execute the statement
-		_, err = stmt.Exec(kanji, kana, sense)
+		_, err = stmt.Exec(entry.EntSeq, kanji, kana, sense)
 		if err != nil {
 			return err
 		}
