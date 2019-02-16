@@ -7,6 +7,7 @@ import (
 	"database/sql"
 
 	"github.com/Xsixteen/super-genki-db/jmdict"
+	kanaConverter "github.com/gojp/kana"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -48,7 +49,7 @@ func InsertData() (err error) {
 	}
 
 	// create the virtual table
-	_, err = tx.Exec("CREATE VIRTUAL TABLE einihongo USING fts4(kanji,kana,gloss)")
+	_, err = tx.Exec("CREATE VIRTUAL TABLE einihongo USING fts4(kanji,kana,gloss,romaji)")
 	if err != nil {
 		return
 	}
@@ -61,7 +62,7 @@ func InsertData() (err error) {
 	for _, entry := range jmdict.Entries {
 		var kanji, kana, sense string
 
-		stmt, err := SQL.Prepare("INSERT INTO einihongo(docid,kanji,kana,gloss) VALUES(?,?,?,?)")
+		stmt, err := SQL.Prepare("INSERT INTO einihongo(docid,kanji,kana,gloss,romaji) VALUES(?,?,?,?,?)")
 		if err != nil {
 			return err
 		}
@@ -75,10 +76,13 @@ func InsertData() (err error) {
 
 		// compress kana
 		var tempKana []string
+		var tempRomaji []string
 		for _, kana := range entry.Rele {
 			tempKana = append(tempKana, kana.Reb)
+			tempRomaji = append(tempRomaji, kanaConverter.KanaToRomaji(kana.Reb))
 		}
 		kana = strings.Join(tempKana, Delimiter)
+		romaji := strings.Join(tempRomaji, Delimiter)
 
 		// compress sense
 		var tempGloss []string
@@ -92,7 +96,7 @@ func InsertData() (err error) {
 		sense = strings.Join(tempSense, SenseDelimiter)
 
 		// execute the statement
-		_, err = stmt.Exec(entry.EntSeq, kanji, kana, sense)
+		_, err = stmt.Exec(entry.EntSeq, kanji, kana, sense, romaji)
 		if err != nil {
 			return err
 		}
