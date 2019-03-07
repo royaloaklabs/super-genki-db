@@ -1,13 +1,11 @@
 package db
 
 import (
+	"fmt"
 	"log"
-	"strings"
 
 	"database/sql"
 
-	"github.com/Xsixteen/super-genki-db/jmdict"
-	kanaConverter "github.com/gojp/kana"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -15,6 +13,15 @@ const (
 	Delimiter      = " "
 	SenseDelimiter = "(SG)"
 	GlossDelimiter = ";;"
+
+	gai2 = 1 << iota
+	spec2
+	ichi2
+	news2
+	gai1
+	spec1
+	ichi1
+	news1
 )
 
 var (
@@ -30,6 +37,8 @@ var (
 
 //Connect to database of choice
 func Connect() {
+	fmt.Printf("[DEBUG] Connecting to Database (%s, %s)\n", Driver, Connection)
+
 	var err error
 	SQL, err = sql.Open(Driver, Connection)
 	if err != nil {
@@ -40,63 +49,30 @@ func Connect() {
 	if err = SQL.Ping(); err != nil {
 		log.Fatal("Database connection error: ", err)
 	}
+
 }
 
-func InsertData() (err error) {
-	tx, err := SQL.Begin()
+func PopulateDatabase(entries []*SGEntry) (err error) {
+	fmt.Println("[INFO] Populating Database")
+	// drop and create the virtual table
+	_, err = SQL.Exec("DROP TABLE IF EXISTS einihongo")
 	if err != nil {
 		return
 	}
 
-	// create the virtual table
-	_, err = tx.Exec("CREATE VIRTUAL TABLE einihongo USING fts4(kanji,kana,gloss,romaji)")
+	_, err = SQL.Exec("CREATE VIRTUAL TABLE einihongo USING fts4(japanese,furigana,english,romanji,freq)")
 	if err != nil {
 		return
 	}
 
-	tx.Commit()
+	stmt, err := SQL.Prepare("INSERT INTO einihongo(docid,japanese,furigana,english,romanji,freq) VALUES(?,?,?,?,?,?)")
 	if err != nil {
-		return
+		return err
 	}
 
-	for _, entry := range jmdict.Entries {
-		var kanji, kana, sense string
-
-		stmt, err := SQL.Prepare("INSERT INTO einihongo(docid,kanji,kana,gloss,romaji) VALUES(?,?,?,?,?)")
-		if err != nil {
-			return err
-		}
-
-		// compress kanji
-		var tempKanji []string
-		for _, kanji := range entry.KEle {
-			tempKanji = append(tempKanji, kanji.Keb)
-		}
-		kanji = strings.Join(tempKanji, Delimiter)
-
-		// compress kana
-		var tempKana []string
-		var tempRomaji []string
-		for _, kana := range entry.Rele {
-			tempKana = append(tempKana, kana.Reb)
-			tempRomaji = append(tempRomaji, kanaConverter.KanaToRomaji(kana.Reb))
-		}
-		kana = strings.Join(tempKana, Delimiter)
-		romaji := strings.Join(tempRomaji, Delimiter)
-
-		// compress sense
-		var tempGloss []string
-		var tempSense []string
-		for _, sense := range entry.Sense {
-			for _, gloss := range sense.Gloss {
-				tempGloss = append(tempGloss, gloss.Value)
-			}
-			tempSense = append(tempSense, strings.Join(tempGloss, GlossDelimiter))
-		}
-		sense = strings.Join(tempSense, SenseDelimiter)
-
+	for _, entry := range entries {
 		// execute the statement
-		_, err = stmt.Exec(entry.EntSeq, kanji, kana, sense, romaji)
+		_, err = stmt.Exec(entry.Id, entry.Japanese, entry.Furigana, entry.English, entry.Romanji, entry.Frequency)
 		if err != nil {
 			return err
 		}

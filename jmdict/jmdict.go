@@ -1,6 +1,7 @@
 package jmdict
 
 import (
+	"fmt"
 	"os"
 	"regexp"
 
@@ -10,6 +11,8 @@ import (
 var Entries []*Entry
 
 func Parse() error {
+	fmt.Println("[INFO] Parsing JMDict Data")
+
 	//get the file
 	data, err := os.Open("./data/JMdict_e")
 	if err != nil {
