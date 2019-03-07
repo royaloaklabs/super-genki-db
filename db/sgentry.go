@@ -8,6 +8,12 @@ import (
 	"github.com/gojp/kana"
 )
 
+const (
+	Delimiter      = " "
+	SenseDelimiter = "(SG)"
+	GlossDelimiter = ";;"
+)
+
 type SGEntry struct {
 	Id        int
 	Japanese  string
@@ -39,6 +45,7 @@ func NewSGEntryFromJMDict(jme *jmdict.Entry) *SGEntry {
 			tempGloss = append(tempGloss, gloss.Value)
 		}
 		tempSense = append(tempSense, strings.Join(tempGloss, GlossDelimiter))
+		tempGloss = make([]string, 0)
 	}
 	entry.English = strings.Join(tempSense, SenseDelimiter)
 

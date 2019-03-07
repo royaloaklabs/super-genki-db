@@ -9,21 +9,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const (
-	Delimiter      = " "
-	SenseDelimiter = "(SG)"
-	GlossDelimiter = ";;"
-
-	gai2 = 1 << iota
-	spec2
-	ichi2
-	news2
-	gai1
-	spec1
-	ichi1
-	news1
-)
-
 var (
 	//SQL is a wrapper for database/sql
 	SQL *sql.DB
