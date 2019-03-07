@@ -10,8 +10,8 @@ import (
 
 const (
 	Delimiter      = " "
-	SenseDelimiter = "(SG)"
-	GlossDelimiter = ";;"
+	SenseDelimiter = "; "
+	GlossDelimiter = ", "
 )
 
 type SGEntry struct {

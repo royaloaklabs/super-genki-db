@@ -10,13 +10,8 @@ $ go get github.com/mattn/go-sqlite3
 ```
 More information about the project can be found at its [Github page](https://github.com/mattn/go-sqlite3).
 
-### JMDict Japanese Dictionary File
-You'll need to download the dictionary file located at the [JMDict Homepage](http://edrdg.org/jmdict/j_jmdict.html). As of right now, this only supports the `JMDict_e` file as we are only supporting English translations. Use the `gzip` utility to extract the XML file and copy it to the `data` directory.
-
-```bash
-$ gzip -d JMdict_e.gz
-$ cp JMDict_e $GOPATH/src/github.com/Xsixteen/SuperGenki-Utilities/data/.
-```
+### Dictionary and Corpus Files
+The main components for creating the database. These needed to be downloaded separately. For more information, view `README` in the `data` folder.
 
 ## Building the Database
 From within the project root:

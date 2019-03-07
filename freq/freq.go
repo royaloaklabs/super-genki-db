@@ -85,4 +85,6 @@ func BuildFrequencyData() {
 	go freqFunc(CorpusWordsFile, " ", 4, 2, 1, false)
 	Wg.Add(1)
 	go freqFunc(CorpusLemmasFile, " ", 4, 2, 1, false)
+
+	Wg.Wait()
 }
