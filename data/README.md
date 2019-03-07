@@ -17,4 +17,4 @@ These are required for generating frequency data. Place all files in this direct
 Download the Japanese Raw Frequencies files from http://worldlex.lexique.org/
 
 ### Large Corpora used in CTS
-Download the text files for *lemmas from the Internet corpus* and *word forms from the Internet corpus* from http://corpus.leeds.ac.uk/list.html
+Download the text files for **lemmas from the Internet corpus** and **word forms from the Internet corpus** from http://corpus.leeds.ac.uk/list.html
