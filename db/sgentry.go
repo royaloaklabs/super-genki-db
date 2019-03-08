@@ -15,12 +15,25 @@ const (
 )
 
 type SGEntry struct {
+	// base data for FTS4 table
 	Id        int
 	Japanese  string
 	Furigana  string
 	English   string
 	Romanji   string
 	Frequency float64
+
+	// extra data for readings table
+	KanjiAlt   []string
+	ReadingAlt []string
+
+	// extra data for definitions table
+	Sense []Sense
+}
+
+type Sense struct {
+	POS   string
+	Gloss string
 }
 
 func NewSGEntryFromJMDict(jme *jmdict.Entry) *SGEntry {
@@ -35,6 +48,20 @@ func NewSGEntryFromJMDict(jme *jmdict.Entry) *SGEntry {
 		// has kanji representation, default w/ kanji and kana
 		entry.Japanese = jme.KEle[0].Keb
 		entry.Furigana = jme.Rele[0].Reb
+
+		// add alternative kanji readings (if any)
+		if len(jme.KEle) > 1 {
+			for i := 1; i < len(jme.KEle); i++ {
+				entry.KanjiAlt = append(entry.KanjiAlt, jme.KEle[i].Keb)
+			}
+		}
+	}
+
+	// add alternative kanji readings (if any)
+	if len(jme.Rele) > 1 {
+		for i := 1; i < len(jme.Rele); i++ {
+			entry.ReadingAlt = append(entry.ReadingAlt, jme.Rele[i].Reb)
+		}
 	}
 
 	// join all Gloss from Sense and combine all Sense into one string
@@ -44,6 +71,13 @@ func NewSGEntryFromJMDict(jme *jmdict.Entry) *SGEntry {
 		for _, gloss := range sense.Gloss {
 			tempGloss = append(tempGloss, gloss.Value)
 		}
+
+		// used for definitions table
+		entry.Sense = append(entry.Sense, Sense{
+			POS:   strings.Join(sense.Pos, "; "),
+			Gloss: strings.Join(tempGloss, ";;"),
+		})
+
 		tempSense = append(tempSense, strings.Join(tempGloss, GlossDelimiter))
 		tempGloss = make([]string, 0)
 	}

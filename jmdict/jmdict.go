@@ -9,6 +9,8 @@ import (
 )
 
 var Entries []*Entry
+var XmlEntities map[string]string
+var XmlReverseEntities map[string]string // make use of later
 
 func Parse() error {
 	fmt.Println("[INFO] Parsing JMDict Data")
@@ -25,7 +27,8 @@ func Parse() error {
 	//get all <!ENTITY> objects in XML
 	//fix errors when trying to parse &n; &hon; etc
 	var rEntity = regexp.MustCompile(`<!ENTITY\s+([^\s]+)\s+"([^"]+)">`)
-	entities := make(map[string]string)
+	XmlEntities := make(map[string]string)
+	XmlReverseEntities := make(map[string]string)
 	entityDecoder := xml.NewDecoder(data)
 	for {
 		t, _ := entityDecoder.Token()
@@ -39,13 +42,14 @@ func Parse() error {
 		}
 
 		for _, m := range rEntity.FindAllSubmatch(dir, -1) {
-			entities[string(m[1])] = string(m[2])
+			XmlEntities[string(m[1])] = string(m[2])
+			XmlReverseEntities[string(m[2])] = string(m[1])
 		}
 	}
 
 	data.Seek(0, 0)
 	decoder := xml.NewDecoder(data) //go through the data again
-	decoder.Entity = entities       //load entities into the decoder EntityMap
+	decoder.Entity = XmlEntities    //load entities into the decoder EntityMap
 	for {
 		//grab all <entry> tokens and Unmarshal into struct
 		t, _ := decoder.Token()
