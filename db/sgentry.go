@@ -20,7 +20,7 @@ type SGEntry struct {
 	Japanese  string
 	Furigana  string
 	English   string
-	Romanji   string
+	Romaji    string
 	Frequency float64
 
 	// extra data for readings table
@@ -83,7 +83,7 @@ func NewSGEntryFromJMDict(jme *jmdict.Entry) *SGEntry {
 	}
 	entry.English = strings.Join(tempSense, SenseDelimiter)
 
-	entry.Romanji = kana.KanaToRomaji(jme.Rele[0].Reb)
+	entry.Romaji = kana.KanaToRomaji(jme.Rele[0].Reb)
 
 	if frequency, ok := freq.DataTable[entry.Japanese]; ok {
 		// frequency data found for Japanese entry (kanji or kana)

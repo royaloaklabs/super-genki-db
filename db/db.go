@@ -49,15 +49,15 @@ func PopulateDatabase(entries []*SGEntry) (err error) {
 	SQL.Exec("DROP TABLE IF EXISTS definitions")
 	SQL.Exec("DROP TABLE IF EXISTS readings")
 
-	_, err = SQL.Exec("CREATE VIRTUAL TABLE einihongo USING fts4(japanese,furigana,english,romanji,freq)")
+	_, err = SQL.Exec("CREATE VIRTUAL TABLE einihongo USING fts4(japanese,furigana,english,romaji,freq)")
 	if err != nil {
 		return
 	}
 
 	SQL.Exec("CREATE TABLE definitions(id INTEGER, pos TEXT, gloss TEXT)")
-	SQL.Exec("CREATE TABLE readings(id INTEGER PRIMARY KEY, japanese TEXT, furigana TEXT, altkanji TEXT, altkana TEXT)")
+	SQL.Exec("CREATE TABLE readings(id INTEGER PRIMARY KEY, japanese TEXT, furigana TEXT, altkanji TEXT, altkana TEXT, romaji TEXT)")
 
-	ftsStmt, err := SQL.Prepare("INSERT INTO einihongo(docid,japanese,furigana,english,romanji,freq) VALUES(?,?,?,?,?,?)")
+	ftsStmt, err := SQL.Prepare("INSERT INTO einihongo(docid,japanese,furigana,english,romaji,freq) VALUES(?,?,?,?,?,?)")
 	if err != nil {
 		return err
 	}
@@ -67,14 +67,14 @@ func PopulateDatabase(entries []*SGEntry) (err error) {
 		return err
 	}
 
-	readingStmt, err := SQL.Prepare("INSERT INTO readings(id,japanese,furigana,altkanji,altkana) VALUES(?,?,?,?,?)")
+	readingStmt, err := SQL.Prepare("INSERT INTO readings(id,japanese,furigana,altkanji,altkana,romaji) VALUES(?,?,?,?,?,?)")
 	if err != nil {
 		return err
 	}
 
 	for _, entry := range entries {
 		// insert into FTS4 entries
-		_, err = ftsStmt.Exec(entry.Id, entry.Japanese, entry.Furigana, entry.English, entry.Romanji, entry.Frequency)
+		_, err = ftsStmt.Exec(entry.Id, entry.Japanese, entry.Furigana, entry.English, entry.Romaji, entry.Frequency)
 		if err != nil {
 			return err
 		}
@@ -90,7 +90,8 @@ func PopulateDatabase(entries []*SGEntry) (err error) {
 		// add all readings
 		_, err = readingStmt.Exec(entry.Id, entry.Japanese, entry.Furigana,
 			strings.Join(entry.KanjiAlt, " "),
-			strings.Join(entry.ReadingAlt, " "))
+			strings.Join(entry.ReadingAlt, " "),
+			entry.Romaji)
 		if err != nil {
 			return err
 		}
