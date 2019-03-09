@@ -7,7 +7,7 @@ You'll need to download the dictionary file located at the [JMDict Homepage](htt
 
 ```bash
 $ gzip -d JMdict_e.gz
-$ cp JMDict_e $GOPATH/src/github.com/Xsixteen/SuperGenki-Utilities/data/.
+$ cp JMDict_e $GOPATH/src/github.com/Xsixteen/super-genki-db/data/.
 ```
 
 ## Corpus Data Files
