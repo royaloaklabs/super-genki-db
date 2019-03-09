@@ -15,6 +15,14 @@ These are required for generating frequency data. Place all files in this direct
 
 ### WorldLex
 Download the Japanese Raw Frequencies files from http://worldlex.lexique.org/
+```bash
+$ unrar e Jap.Freq.2.rar
+$ cp Jap.Freq.2.txt $GOPATH/src/github.com/Xsixteen/super-genki-db/data/.
+```
 
 ### Large Corpora used in CTS
 Download the text files for **lemmas from the Internet corpus** and **word forms from the Internet corpus** from http://corpus.leeds.ac.uk/list.html
+
+```bash
+$ cp internet-jp-forms.num internet-jp.num $GOPATH/src/github.com/Xsixteen/super-genki-db/data/.
+```
