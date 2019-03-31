@@ -3,9 +3,9 @@ package db
 import (
 	"strings"
 
-	"github.com/Xsixteen/super-genki-db/freq"
-	"github.com/Xsixteen/super-genki-db/jmdict"
 	"github.com/gojp/kana"
+	"github.com/royaloaklabs/super-genki-db/freq"
+	"github.com/royaloaklabs/super-genki-db/jmdict"
 )
 
 const (

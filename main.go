@@ -3,9 +3,9 @@ package main
 import (
 	"log"
 
-	"github.com/Xsixteen/super-genki-db/db"
-	"github.com/Xsixteen/super-genki-db/freq"
-	"github.com/Xsixteen/super-genki-db/jmdict"
+	"github.com/royaloaklabs/super-genki-db/db"
+	"github.com/royaloaklabs/super-genki-db/freq"
+	"github.com/royaloaklabs/super-genki-db/jmdict"
 )
 
 func main() {
