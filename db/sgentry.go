@@ -34,6 +34,7 @@ type SGEntry struct {
 type Sense struct {
 	POS   string
 	Gloss string
+	Misc  string
 }
 
 func NewSGEntryFromJMDict(jme *jmdict.Entry) *SGEntry {
@@ -76,6 +77,7 @@ func NewSGEntryFromJMDict(jme *jmdict.Entry) *SGEntry {
 		entry.Sense = append(entry.Sense, Sense{
 			POS:   strings.Join(sense.Pos, "; "),
 			Gloss: strings.Join(tempGloss, ";;"),
+			Misc:  strings.Join(sense.Misc, "; "),
 		})
 
 		tempSense = append(tempSense, strings.Join(tempGloss, GlossDelimiter))

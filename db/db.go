@@ -48,26 +48,33 @@ func PopulateDatabase(entries []*SGEntry) (err error) {
 
 	SQL.Exec("DROP TABLE IF EXISTS definitions")
 	SQL.Exec("DROP TABLE IF EXISTS readings")
+	SQL.Exec("DROP TABLE IF EXISTS sense_misc")
 
 	_, err = SQL.Exec("CREATE VIRTUAL TABLE einihongo USING fts4(japanese,furigana,english,romaji,freq)")
 	if err != nil {
 		return
 	}
 
-	SQL.Exec("CREATE TABLE definitions(id INTEGER, pos TEXT, gloss TEXT)")
+	SQL.Exec("CREATE TABLE definitions(id INTEGER PRIMARY KEY AUTOINCREMENT, docid INTEGER, pos TEXT, gloss TEXT)")
 	SQL.Exec("CREATE TABLE readings(id INTEGER PRIMARY KEY, japanese TEXT, furigana TEXT, altkanji TEXT, altkana TEXT, romaji TEXT)")
+	SQL.Exec("CREATE TABLE sense_misc(senseid INTEGER, docid INTEGER, misc TEXT, PRIMARY KEY (senseid, docid, misc))")
 
 	ftsStmt, err := SQL.Prepare("INSERT INTO einihongo(docid,japanese,furigana,english,romaji,freq) VALUES(?,?,?,?,?,?)")
 	if err != nil {
 		return err
 	}
 
-	definitionStmt, err := SQL.Prepare("INSERT INTO definitions(id,pos,gloss) VALUES(?,?,?)")
+	definitionStmt, err := SQL.Prepare("INSERT INTO definitions(docid,pos,gloss) VALUES(?,?,?)")
 	if err != nil {
 		return err
 	}
 
 	readingStmt, err := SQL.Prepare("INSERT INTO readings(id,japanese,furigana,altkanji,altkana,romaji) VALUES(?,?,?,?,?,?)")
+	if err != nil {
+		return err
+	}
+
+	miscStmt, err := SQL.Prepare("INSERT INTO sense_misc(senseid, docid, misc) VALUES(?,?,?)")
 	if err != nil {
 		return err
 	}
@@ -81,9 +88,20 @@ func PopulateDatabase(entries []*SGEntry) (err error) {
 
 		// add all senses into definitions table
 		for _, sense := range entry.Sense {
-			_, err = definitionStmt.Exec(entry.Id, sense.POS, sense.Gloss)
+			rslt, err := definitionStmt.Exec(entry.Id, sense.POS, sense.Gloss)
 			if err != nil {
 				return err
+			}
+			rowId, err := rslt.LastInsertId()
+			if err != nil {
+				return err
+			}
+
+			if sense.Misc != "" {
+				_, err := miscStmt.Exec(rowId, entry.Id, sense.Misc)
+				if err != nil {
+					return err
+				}
 			}
 		}
 
@@ -98,6 +116,6 @@ func PopulateDatabase(entries []*SGEntry) (err error) {
 
 	}
 
-	SQL.Exec("CREATE INDEX definitions_id_index ON definitions(id)")
+	SQL.Exec("CREATE INDEX idx_definitions_docid ON definitions(docid)")
 	return nil
 }
