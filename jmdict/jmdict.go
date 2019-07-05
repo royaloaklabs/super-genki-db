@@ -65,6 +65,17 @@ func Parse() error {
 				if err = decoder.DecodeElement(&e, &se); err != nil {
 					return err
 				}
+
+				for _, sense := range e.Sense {
+					for i, pos := range sense.Pos {
+						sense.Pos[i] = XmlReverseEntities[pos]
+					}
+
+					for i, misc := range sense.Misc {
+						sense.Misc[i] = XmlReverseEntities[misc]
+					}
+				}
+
 				Entries = append(Entries, e)
 			}
 		default:
