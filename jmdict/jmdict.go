@@ -27,8 +27,8 @@ func Parse() error {
 	//get all <!ENTITY> objects in XML
 	//fix errors when trying to parse &n; &hon; etc
 	var rEntity = regexp.MustCompile(`<!ENTITY\s+([^\s]+)\s+"([^"]+)">`)
-	XmlEntities := make(map[string]string)
-	XmlReverseEntities := make(map[string]string)
+	XmlEntities = make(map[string]string)
+	XmlReverseEntities = make(map[string]string)
 	entityDecoder := xml.NewDecoder(data)
 	for {
 		t, _ := entityDecoder.Token()
@@ -65,6 +65,17 @@ func Parse() error {
 				if err = decoder.DecodeElement(&e, &se); err != nil {
 					return err
 				}
+
+				for _, sense := range e.Sense {
+					for i, pos := range sense.Pos {
+						sense.Pos[i] = XmlReverseEntities[pos]
+					}
+
+					for i, misc := range sense.Misc {
+						sense.Misc[i] = XmlReverseEntities[misc]
+					}
+				}
+
 				Entries = append(Entries, e)
 			}
 		default:
