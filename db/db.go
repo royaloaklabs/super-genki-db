@@ -8,6 +8,7 @@ import (
 	"database/sql"
 
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/royaloaklabs/super-genki-db/jmdict"
 )
 
 var (
@@ -49,6 +50,7 @@ func PopulateDatabase(entries []*SGEntry) (err error) {
 	SQL.Exec("DROP TABLE IF EXISTS definitions")
 	SQL.Exec("DROP TABLE IF EXISTS readings")
 	SQL.Exec("DROP TABLE IF EXISTS sense_misc")
+	SQL.Exec("DROP TABLE IF EXISTS entity_members")
 
 	_, err = SQL.Exec("CREATE VIRTUAL TABLE einihongo USING fts4(japanese,furigana,english,romaji,freq)")
 	if err != nil {
@@ -58,6 +60,7 @@ func PopulateDatabase(entries []*SGEntry) (err error) {
 	SQL.Exec("CREATE TABLE definitions(id INTEGER PRIMARY KEY AUTOINCREMENT, docid INTEGER, pos TEXT, gloss TEXT)")
 	SQL.Exec("CREATE TABLE readings(id INTEGER PRIMARY KEY, japanese TEXT, furigana TEXT, altkanji TEXT, altkana TEXT, romaji TEXT)")
 	SQL.Exec("CREATE TABLE sense_misc(senseid INTEGER, docid INTEGER, misc TEXT, PRIMARY KEY (senseid, docid, misc))")
+	SQL.Exec("CREATE TABLE entity_members(abbvr TEXT, meaning TEXT)")
 
 	ftsStmt, err := SQL.Prepare("INSERT INTO einihongo(docid,japanese,furigana,english,romaji,freq) VALUES(?,?,?,?,?,?)")
 	if err != nil {
@@ -79,6 +82,14 @@ func PopulateDatabase(entries []*SGEntry) (err error) {
 		return err
 	}
 
+	fmt.Println("[DEBUG] INSERT XmlEntities")
+	for abbvr, meaning := range jmdict.XmlEntities {
+		if _, err := SQL.Exec("INSERT INTO entity_members(abbvr, meaning) VALUES(?,?)", abbvr, meaning); err != nil {
+			return err
+		}
+	}
+
+	fmt.Println("[DEBUG] INSERT entries")
 	for _, entry := range entries {
 		// insert into FTS4 entries
 		_, err = ftsStmt.Exec(entry.Id, entry.Japanese, entry.Furigana, entry.English, entry.Romaji, entry.Frequency)
