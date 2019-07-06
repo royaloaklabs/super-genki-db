@@ -47,11 +47,13 @@ func PopulateDatabase(entries []*SGEntry) (err error) {
 		return
 	}
 
+	fmt.Println("[DEBUG] DROP tables")
 	SQL.Exec("DROP TABLE IF EXISTS definitions")
 	SQL.Exec("DROP TABLE IF EXISTS readings")
 	SQL.Exec("DROP TABLE IF EXISTS sense_misc")
 	SQL.Exec("DROP TABLE IF EXISTS entity_members")
 
+	fmt.Println("[DEBUG] CREATE tables")
 	_, err = SQL.Exec("CREATE VIRTUAL TABLE einihongo USING fts4(japanese,furigana,english,romaji,freq)")
 	if err != nil {
 		return
@@ -128,5 +130,8 @@ func PopulateDatabase(entries []*SGEntry) (err error) {
 	}
 
 	SQL.Exec("CREATE INDEX idx_definitions_docid ON definitions(docid)")
+
+	SQL.Exec("DROP VIEW IF EXISTS dirty_talk")
+	SQL.Exec("CREATE VIEW dirty_talk AS SELECT DISTINCT docid FROM sense_misc WHERE misc = 'vulg' OR misc = 'sl' OR misc = 'm-sl'")
 	return nil
 }
