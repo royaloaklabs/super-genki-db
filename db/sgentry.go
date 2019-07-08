@@ -1,6 +1,7 @@
 package db
 
 import (
+	"database/sql"
 	"strings"
 
 	"github.com/gojp/kana"
@@ -32,9 +33,9 @@ type SGEntry struct {
 }
 
 type Sense struct {
-	POS   string
+	POS   sql.NullString
 	Gloss string
-	Misc  string
+	Misc  sql.NullString
 }
 
 func NewSGEntryFromJMDict(jme *jmdict.Entry) *SGEntry {
@@ -75,9 +76,9 @@ func NewSGEntryFromJMDict(jme *jmdict.Entry) *SGEntry {
 
 		// used for definitions table
 		entry.Sense = append(entry.Sense, Sense{
-			POS:   strings.Join(sense.Pos, "; "),
+			POS:   newNullString(strings.Join(sense.Pos, "; ")),
 			Gloss: strings.Join(tempGloss, ";;"),
-			Misc:  strings.Join(sense.Misc, "; "),
+			Misc:  newNullString(strings.Join(sense.Misc, "; ")),
 		})
 
 		tempSense = append(tempSense, strings.Join(tempGloss, GlossDelimiter))
@@ -99,4 +100,15 @@ func NewSGEntryFromJMDict(jme *jmdict.Entry) *SGEntry {
 		entry.Frequency = -1.0
 	}
 	return entry
+}
+
+func newNullString(s string) sql.NullString {
+	if len(s) == 0 {
+		return sql.NullString{}
+	}
+
+	return sql.NullString{
+		String: s,
+		Valid:  true,
+	}
 }
