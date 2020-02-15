@@ -8,6 +8,11 @@ PLATFORMS := windows linux darwin
 OS = $(word 1, $@)
 DB_FILE = jisho-main.db
 
+build: pre local
+
+local:
+	go run main.go
+
 test:
 	@$(CC) test ./...
 
@@ -20,9 +25,6 @@ pre:
 release: clean pre $(PLATFORMS)
 
 windows: POSTFIX = .exe
-
-local:
-	go run main.go
 
 install:
 	@go install
