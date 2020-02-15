@@ -16,7 +16,7 @@ func Parse() error {
 	fmt.Println("[INFO] Parsing JMDict Data")
 
 	//get the file
-	data, err := os.Open("./data/JMdict_e")
+	data, err := os.Open("./data/JMdict")
 	if err != nil {
 		return err
 	}
